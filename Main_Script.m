@@ -282,3 +282,8 @@ else
     imagesc(DepthSq), colormap(ax2,parula),
     title(['Depth Model (r = ',num2str(roundCorr),')']),axis square
 end
+
+
+%% 8 - Save electrode coordinates in correct order:
+coordsPred = coordsPred(ind,:);
+save('intraop008_projected_electrodes_gridloc.mat', 'cortex', 'coordsPred');
