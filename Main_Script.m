@@ -106,7 +106,8 @@ ROI_no        = 1;
 %Meaning, top left corner is electrode 1 and bottom right corner is
 %electrode 64. 
 
-gridLayout; %layout is set in inputGrid variable. 
+% gridLayout; %layout is set in inputGrid variable. 
+inputgrid = 1:128;
 
 %set dimensions of grid according to side of leads for the rest of the script.
 %This way it accounts for rectangular grid  
@@ -174,10 +175,7 @@ ind = indexFuncLegacy(subj_info);
 gamma_mean=gamma_mean(ind); %index it according to gridLayout, values are now in order of 1:64
 
 %Normalize gamma values (set between 0 and 1)
-normGamma = [];
-for i = 1:length(gamma_mean)
-    normGamma(i) = ((gamma_mean(i)-min(gamma_mean))/max(gamma_mean))';
-end
+normGamma = rescale(gamma_mean);
 normGamma = normGamma';
 
 %Calculate correlation between normalized gamma values and the predicted
@@ -260,30 +258,30 @@ end
 if useAngio==1 
     ax1 = subaxis(4,4,13,'Spacing',0);
     imagesc(GammaSq), colormap(ax1,parula),
-    title('Gamma Mean'), axis square, 
+    title('Gamma Mean'), axis square, axis off
     
     ax2=subaxis(4,4,14,'Spacing',0); 
     imagesc(CombinedSq), colormap(ax2,parula),
-    title(['Combined Model (r = ',num2str(roundCorr),')']), axis square, 
+    title(['Combined Model (r = ',num2str(roundCorr),')']), axis square, axis off
     
     ax3=subaxis(4,4,16,'Spacing',0); 
     imagesc(AngioSq), colormap(ax3,parula),
-    title('Angio Model'), axis square, 
+    title('Angio Model'), axis square; axis off
     
     ax4=subaxis(4,4,15,'Spacing',0); 
     imagesc(DepthSq), colormap(ax4,parula), 
-    title('Depth Model'), axis square
+    title('Depth Model'), axis square, axis off
 else
     ax1 = subaxis(4,4,14,'Spacing',0); 
     imagesc(GammaSq), colormap(ax1,parula), 
-    title('Gamma Mean'), axis square, 
+    title('Gamma Mean'), axis square, axis off
     
     ax2=subaxis(4,4,15,'Spacing',0); 
     imagesc(DepthSq), colormap(ax2,parula),
-    title(['Depth Model (r = ',num2str(roundCorr),')']),axis square
+    title(['Depth Model (r = ',num2str(roundCorr),')']),axis square, axis off
 end
 
 
 %% 8 - Save electrode coordinates in correct order:
 coordsPred = coordsPred(ind,:);
-save('intraop008_projected_electrodes_gridloc.mat', 'cortex', 'coordsPred');
+save('intraopXXX_projected_electrodes_gridloc.mat', 'cortex', 'coordsPred');
