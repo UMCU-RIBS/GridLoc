@@ -1,4 +1,5 @@
 function opts = eb_visualizer_set_defauts(opts)
+% (c) Julia Berezutskaya, https://github.com/Immiora
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% general %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if ~isfield(opts, 'fig_handle'),
@@ -100,8 +101,6 @@ if ~isfield(opts, 'e_data_colorbar_show'),
 
 if ~isfield(opts, 'e_data_colorbar_label'), 
     opts.e_data_colorbar_label  = ''; end
-
-
 
 
 fields = fieldnames(opts);

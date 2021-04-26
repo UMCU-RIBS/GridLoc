@@ -1,8 +1,5 @@
 function cmap = eb_visualizer_make_colormap(mapstr, lim, base_col)
-% cmap = eb_visualizer_make_colormap('gr2r', 64);
-% figure
-% colormap(cmap)
-% colorbar
+% (c) Julia Berezutskaya, https://github.com/Immiora
 
 if nargin < 2, lim = 64; end
 if nargin < 3, base_col = [0.5 0.5 0.5]; end
@@ -59,18 +56,9 @@ switch mapstr
         m(2:4, 2) = linspace(base_col(2), 0, 3);
         m(2:4, 3) = linspace(base_col(3), 0, 3);
         cmap = m;
-        
-%         m = colormap(flipud(hot(64)));
-%         m(1, :)     = 0.45;
-% 
-%         m(2:7, 1) = linspace(0.45, 1, 6); 
-%         m(2:7, 2) = linspace(0.45, 1, 6);
-%         m(2:7, 3) = linspace(0.45, 0, 6);
-%         cmap = m;
+
     case 'custom_red'
         m = zeros(64, 3);
-        % m(1, :)     = base_col;
-
         m(1:end, 1) = linspace(0.3, 0.5, 64);
         m(1:end, 2:3) = zeros(64, 2);
         cmap = m;

@@ -1,5 +1,5 @@
 	      
-	      V 1.2
+	      V 1.3
 
   Added 5/12/2017 by M. Leibbrand:
 
@@ -11,3 +11,9 @@
     - housekeeping: deleting unused files and organizing folders
     - cleaned the main script. copied from previous version and adapted.
 
+
+  Added 26/04/2021 by MP Branco:
+
+    - indexing of predicted electrode coordinates corrected for leads on left and right side.
+    - indexfundlegacy function adjusted to return both forward and inverse indices between grid and gridloc spaces
+    - cleaned the main script.

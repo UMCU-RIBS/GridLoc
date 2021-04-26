@@ -1,10 +1,6 @@
 function eb_visualizer(surface, surface_data, electrodes, electrode_data, opts)
-% 
-% faces, vertices
-% cdata (matrix) / annotation labels?
-% electrode locations
-% electrode weights / classes
-% figure
+
+% (c) Julia Berezutskaya, https://github.com/Immiora
 
 if nargin < 1, error('No input'); end
 if nargin < 2, surface_data = []; electrodes = []; electrode_data = []; end
@@ -18,7 +14,7 @@ plot_surface    = 1;
 plot_electrodes = 1;
 plot_s_data     = 1;
 plot_e_data     = 1;
-e2s_data        = 0; % need that?
+e2s_data        = 0; 
 
 if isempty(surface),        plot_surface = 0; end
 if isempty(electrodes),     plot_electrodes = 0; end
@@ -58,7 +54,7 @@ if plot_e_data == 1,
         case 'size_color'
             e_mkr_size = zeros(size(e_data_norm));           
             e_mkr_size(~e_data_nans) = e_data_scale(e_data_norm(~e_data_nans));
-            e_color = e_data; % e_data_cmap(e_data_norm, :);
+            e_color = e_data; 
     end
 end
 
@@ -76,7 +72,6 @@ if plot_s_data == 1,
     
     if size(s_data, 2) == 1,       
        e_data2s_data_cmap = eb_visualizer_make_colormap(['custom_', s_data_cmap], 64);
-       % s_data_span = [-1 1];
        s_data = eb_visualizer_x_data2triplets(s_data, e_data2s_data_cmap, ...
            s_data_span, s_data_thresh, surf_color_default(1)); % eb_visualizer_s_data2colors
 
@@ -159,19 +154,12 @@ camlight('headlight','infinite')
 material dull; 
 axis off; axis equal; axis tight
 hold on
-   
-% shading flat
-% set(gcf, 'renderer', 'zbuffer')
-% surface_position = get(gca, 'position');
 
 if plot_e_data == 1 && e_data_colorbar_show == 1,
      colormap(e_data_cmap)
      % set(gca, 'clim', e_data_span)
      caxis(e_data_span)
      e_data_cbar = colorbar('east', 'fontsize', 10, 'axislocation', 'out'); 
-     % x = get(e_data_cbar, 'position');
-     % x = [x(3)/2-x(1) x(2)-x(4)/2 (x(3)/2-x(1))*2 x(4)/2];
-     % set(e_data_cbar, 'position', x);
      if ~isempty(e_data_colorbar_label)
         e_data_cbar.Label.String = e_data_colorbar_label;
         e_data_cbar.Label.FontSize = 16;
@@ -182,18 +170,14 @@ end
 if plot_s_data == 1 && s_data_colorbar_show == 1,
      s_data_cbar = newcolorbar('west', 'fontsize', 10, 'axislocation', 'in');     
      colormap(gca, s_data_cmap)
-     % set(gca, 'clim', s_data_span)
+
      caxis(s_data_span)
-     % x = get(s_data_cbar, 'position');
-     % x = [x(3)/2-x(1) x(2)-x(4)/2 (x(3)/2-x(1))*2 x(4)/2];
-     % set(s_data_cbar, 'position', x);
      if ~isempty(s_data_colorbar_label)
         s_data_cbar.Label.String = s_data_colorbar_label;
         s_data_cbar.Label.FontSize = 16;
      end
 end
 
-% set(gca, 'position', surface_position);
 
 
 

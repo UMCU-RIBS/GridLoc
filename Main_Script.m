@@ -1,87 +1,79 @@
-%% Gridloc Toolbox V1.2
-%  25/05/2018
-%
-%  (C) Michael Leibbrand - michael.leib7@gmail.com
-%  (C) Mariana P Branco  - m.pedrosobranco@umcutrecht.nl
 
-warning off; %turn off to reduce clutter in command window. 
+% Gridloc Toolbox V1.3
+%  26/04/2021
+%
+% UMC Utrecht
+%  (C) Mariana P Branco  - m.pedrosobranco@umcutrecht.nl
+%  (C) Michael Leibbrand - michael.leib7@gmail.com
+
+warning off; %turn off to reduce clutter in command window.
 clear all; close all; clc;
 
 %Paths of (support) files/scripts
-addpath(genpath('...\GridLoc Toolbox'));
-cd '...\GridLoc Toolbox\' 
+addpath(genpath('.../GridLoc/'));
 
 
 %% 1- Create the subject info structure and set the location of the input files.
 
-subj_info.gamma_mean    = 'gamma_mean.mat'; %Set location of file with the caclulated values of mean Gamma (i.e., high-frequency band) activity per electrode
-subj_info.chansel       = [1:64]; %channel selection HD grid
-subj_info.bad_channels  = [1, 8, 57, 64]; %set bad channels
-subj_info.dims          = [8,8]; %amount of electrodes [X,Y]. X-direction is side where the leads are located.
-subj_info.intElec       = [3,3]; %inter-electrode distance in mm [X,Y]. Check equipment specifications for details.
-%square mm ROI coverage, state x*y sizes, minimum is 9 square mm [3,3]
-subj_info.ROIsize       = [3,3]; %try to keep ROIsize at/under [11,11] due to processing time (~12 hours for [11,11] 8x4 grid)
-subj_info.stepSize      = [1]; %set stepsize for the spacing of ROI-points (in mm). 
+%set method parameters
+subj_info.HFB_mean    = '.../HFB_pattern.mat'; %Set location of file with the caclulated values of mean HFB (i.e., high-frequency band) activity per electrode
+subj_info.chansel       = [1:128]; %channel selection HD grid
+subj_info.bad_channels  = []; %set bad channels
+subj_info.dims          = [8,16]; %amount of electrodes [X,Y]. X-direction is side where the leads are located.
+subj_info.intElec       = [3,3]; %inter-electrode distance in mm [X,Y]. 
+                                 %check equipment specifications for details.
+                                 %square mm ROI coverage, state x*y sizes, minimum is 9 square mm [3,3]
+subj_info.ROIsize       = [11,11]; %try to keep ROIsize at/under [11,11] due to processing time (~12 hours for [11,11] 8x4 grid)
+subj_info.stepSize      = 1; %set stepsize for the spacing of ROI-points (in mm).
 
-%Viewstruct and other NeuralAct viewBrain options 
-%N.B.: Make sure you use the neuralAct package provided with THIS toolbox. It has been edited!
-subj_info.hemiVect.hemi = 'l'; %set hemisphere
-subj_info.hemiVect.side = 'u'; %side of leads/cables (u, d, l or r)
-switch subj_info.hemiVect.hemi
-    case 'r'
-        subj_info.viewstruct.lightpos = [180,0,0]; 
-        subj_info.what2view = {'brain'};
-        subj_info.transp    = 1;
-        subj_info.colix     = 0;
-        subj_info.viewvect  = [90, 0];
-    case 'l'
-        subj_info.viewstruct.lightpos = [-180,0,0];
-        subj_info.what2view = {'brain'};
-        subj_info.viewvect  = [270, 0];
-        subj_info.transp    = 1;
-        subj_info.colix     = 0;
-end
+subj_info.hemiVect.hemi = 'r'; %set hemisphere
+subj_info.hemiVect.side = 'r'; %side of leads/cables: u (up), d (down), l (left) or r (right)
+
+%enter subject code name
+subj_info.subj_name     = 'name';
 
 %Import freesurfer cortex file and convert to triangular surface model
 %to use with neuralAct
 if ~exist('hullcortex','var')
     %select niftii (.nii) cortex representation to convert into a triangular surface representation
-    cortex = gen_cortex_click_from_FreeSurfer('SetSubjectName', 0.5, [15 3], subj_info.hemiVect.hemi); 
-    cortexcoarser = coarserModel(cortex, 10000);      %make the model coarser
-    hullcortex = hullModel(cortexcoarser);            %compute the convex hull
-    save('neuralAct_SetSubjectName.mat','cortex','cortexcoarser','hullcortex')
-    subj_info.neuralAct = 'neuralAct_SetSubjectName.mat';
+    cortex              = gen_cortex_click_from_FreeSurfer(subj_info.subj_name, 0.5, [15 3], subj_info.hemiVect.hemi);
+    cortexcoarser       = coarserModel(cortex, 10000);      %make the model coarser
+    hullcortex          = hullModel(cortexcoarser);         %compute the convex hull
+    subj_info.neuralAct = ['./Results/' subj_info.subj_name '_neuralAct.mat'];
+    
+    save(['./Results/' subj_info.subj_name '_neuralAct.mat'],'cortex','cortexcoarser','hullcortex');
 end
 
 
 
 %% 2 - Process the angiogram files:
 
-subj_info.sfile      = 'Subject_surface.img'; %surface balloon of the brain, to project the vessels
-subj_info.tfile      = 'Subject_masked_angio.img'; %Angiogram T-file
-subj_info.Tthreshold = 311750; %threshold voor T-statistic for angiogram T-file with vessel information
-subj_info.VoxelDepth = 8;      %searchdepth for co-registration of vessels to surface 
-save('subjectInfo_SetSubjectName.mat','subj_info')
+subj_info.sfile      = ['./Results/' subj_info.subj_name '_balloon_11_03.nii']; %surface balloon of the brain, to project the vessels
+subj_info.tfile      = '.../angiogram.nii'; %Angiogram T-file
+subj_info.Tthreshold = 70;    %threshold voor T-statistic for angiogram T-file with vessel information
+subj_info.VoxelDepth = 8;      %searchdepth for co-registration of vessels to surface
+
+save(['./Results/' subj_info.subj_name '_subjectInfo.mat'],'subj_info');
 
 %Calculate angioMap - Use this function to use the T-map and surface map
 %files of the angiogram to calculate an angiomap which is coregistered to
 %the cortex files from the NeuralAct package. T-threshold is equal to the
 %lower boundary found for the angiogram via the software package MRIcron.
-%Upper boundary can be adjusted from within the function, if necessary. 
+%Upper boundary can be adjusted from within the function, if necessary.
 %N.B.: Save normAngio after running because it might take some time.
-if ~exist('angioMap','var')
-    [angioMap,normAngio]  = calculateAngioMap(subj_info,subj_info.Tthreshold,subj_info.VoxelDepth,1);
-    save('AngioMap_SetSubjectName.mat','angioMap','normAngio')
-end
+[angioMap,normAngio]  = calculateAngioMap(subj_info,subj_info.Tthreshold,subj_info.VoxelDepth,1);
+
+save(['./Results/' subj_info.subj_name '_AngioMap.mat'],'angioMap','normAngio');
+
 
 
 %% 3 - Calculate ROI and set Grid properties:
 
-%Load the files previosuly created:
+%Load the files previously created:
 if ~exist('subj_info','var')
-    load('subjectInfo_SetSubjectName.mat')
+    load(['./Results/' subj_info.subj_name '_subjectInfo.mat']);
     load (subj_info.neuralAct);
-    load ('AngioMap_SetSubjectName.mat');
+    load (['./Results/' subj_info.subj_name '_AngioMap.mat']);
 end
 
 %set gridLayout
@@ -89,28 +81,29 @@ global dims;          %for gridLayout.m
 global inputGrid      %for gridLayout.m
 global numElec        %for gridLayout.m
 
-dims      = subj_info.dims;%[8,8] means it's a squared 8x8=64 electrode grid, [4,8] means it's a 4 by 8=32 electrode grid. 
+dims      = subj_info.dims;
 numElec   = dims(1)*dims(2);
-inputGrid = 1:numElec; %set inputgrid to 1:64
 
 % Define ROI and get tangent plane from ROI
 global contOnCommand; %for getROI
 contOnCommand = 1;
 ROI_no        = 1;
-[coords_ROI]  = getROI(cortex,hullcortex,contOnCommand,subj_info); 
+[coords_ROI]  = getROI(cortex,hullcortex,contOnCommand,subj_info);
 
 
-%Note the channel index, starting in the topleft corner. 
+%Note the channel index, starting in the topleft corner.
 %This is useful when the grids aren't numbered in ascending, or descending
 %order but randomly. Standard inputGrid is set to 1:64 when clicking 'set layout' whilst leaving the fields empty.
 %Meaning, top left corner is electrode 1 and bottom right corner is
-%electrode 64. 
+%electrode e.g. 128.
 
-% gridLayout; %layout is set in inputGrid variable. 
-inputgrid = 1:128;
+%Set layout using interface.
+% gridLayout; 
+%or input indexes manually here:
+inputGrid = 1:128;
 
 %set dimensions of grid according to side of leads for the rest of the script.
-%This way it accounts for rectangular grid  
+%This way it accounts for rectangular grid
 auxDims = dims;
 if dims(1)~=dims(2)
     if (strcmp(subj_info.hemiVect.side,'l')+strcmp(subj_info.hemiVect.side,'r'))>0
@@ -118,9 +111,9 @@ if dims(1)~=dims(2)
         auxDims(2)=dims(1);
     end
 end
-clear('ROI_no','contOnCommand','gridSpecs','ans') %housekeeping
+clear('ROI_no','contOnCommand','gridSpecs','ans'); %housekeeping
 
-save('GridInfo_SetSubjectName.mat','inputGrid','auxDims', 'dims', 'coords_ROI', 'numElec');
+save(['./Results/' subj_info.subj_name '_GridInfo.mat'],'inputGrid','auxDims', 'dims', 'coords_ROI', 'numElec');
 
 
 
@@ -135,7 +128,7 @@ projectedROIpoints.electrodes = coords_ROI.ROI_Tangent;
 
 %Set rotation in degrees and derive amount of turns
 %set this to 45 to run a quick test of code. Usually set to 1 degree during an actual run
-rotation = 1; 
+rotation = 1;
 turns = round((90/rotation)-1);
 
 %create Grid per ROI point and project on cortex
@@ -155,34 +148,36 @@ if useAngio == 1
 else
     ROI = calculateModel( subj_info, ROI, cortex);
 end
-elapsedTime3=toc;
+elapsedTime3 = toc;
 
 % Save the result:
-save('SubjectName_ROI_11x11.mat','ROI','-v7.3') %save ROI struct after running 
+save(['./Results/' subj_info.subj_name ...
+    '_ROI_' num2str(subj_info.ROIsize(1)) 'x' num2str(subj_info.ROIsize(1)) ...
+    '_' date '.mat'],'ROI','-v7.3'); %save ROI struct after running
 
 
 
-%% 5 - Run model correlation to Gamma and plot results:
+%% 5 - Run model correlation to HFB:
 
 %housekeeping
-clear('elapsedTime1','elapsedTime2','elapsedTime3','turns','rotation','projectedROIpoints') 
+clear('elapsedTime1','elapsedTime2','elapsedTime3','turns','rotation','projectedROIpoints')
 
-%Load gamma_mean and index according to gridLayout. 
-load (subj_info.gamma_mean)
-gamma_mean(subj_info.bad_channels) = NaN; %set bad channels to NaN
-gamma_mean = gamma_mean(subj_info.chansel);
-ind = indexFuncLegacy(subj_info);
-gamma_mean=gamma_mean(ind); %index it according to gridLayout, values are now in order of 1:64
+%Load HFB_mean and index according to gridLayout.
+load(subj_info.HFB_mean);
+HFB_mean(subj_info.bad_channels)  = NaN; %set bad channels to NaN
+HFB_mean                          = HFB_mean(subj_info.chansel);
+%index it according to gridLayout
+[forward_ind, inverse_ind]        = indexFuncLegacy(subj_info);
+HFB_mean                          = HFB_mean(forward_ind); 
 
-%Normalize gamma values (set between 0 and 1)
-normGamma = rescale(gamma_mean);
-normGamma = normGamma';
+%Normalize HFB values (set between 0 and 1)
+normHFB = rescale(HFB_mean);
 
-%Calculate correlation between normalized gamma values and the predicted
-%values for all Grids on all ROI points. 
+%Calculate correlation between normalized HFB values and the predicted
+%values for all Grids on all ROI points.
 for i = 1:length(ROI)
     for ij = 1:length(ROI(1).coords)
-        corrMatrix = corrcoef(ROI(i).coords(ij).weights, normGamma,'rows','complete');
+        corrMatrix = corrcoef(ROI(i).coords(ij).weights, normHFB,'rows','complete');
         ROI(i).coords(ij).corr = corrMatrix(1,2);
     end
 end
@@ -193,42 +188,59 @@ for i = 1:length(ROI)
     maxima(i,:)= [ROI(i).coords.corr];
 end
 
-[a,b]=find(maxima(:,:) == max(maxima(:))); %find row and collumn maximum correlation
+[a,b] = find(maxima(:,:) == max(maxima(:))); %find row and collumn maximum correlation
 corrPred = ROI(a).coords(b).corr;
 
 %display correlation of predicted
-disp(['correlation = ' num2str(corrPred)]);
+disp(['Best correlation = ' num2str(corrPred)]);
 
 
 
 %% 6 - Display the the electrode prediction:
 
-% Display the cortex:
-figure;
+%display the cortex:
+figure; 
 colormap jet;
-subaxis(4,4,[1:4, 5:8, 9:12],'SV',0,'SH',0.5);
-viewBrain(cortex,subj_info.hemiVect.hemi);
-axis off;
-hold on;
+subaxis(5,4,[1:4, 5:8, 9:12],'SV',0,'SH',0.5);
+ctmr_gauss_plot(cortex,[0 0 0],0); axis off; hold on;
 
-%display the predicted locations:
-coordsPred = ROI(a).coords(b).trielectrodes;
-plotSpheres(coordsPred,[0.99,0.07,0.17]); 
+%re-index predicted coordinates to match grid layout: 
+coordsPred = ROI(a).coords(b).trielectrodes; 
+coordsPred = coordsPred(inverse_ind,:);
+
+%plot coordinates as spheres:
+plotSpheres(coordsPred,[0.99,0.07,0.17]);
+%or using the electrode label
+% label_add(coordsPred);
+
+%set view to correct hemisphere:
+switch subj_info.hemiVect.hemi
+    case 'l'
+        loc_view(-90,0);
+    case 'r'
+        loc_view(90,0);
+end
+
+%save coordinates:
+save(['./Results/' subj_info.subj_name '_projected_electrodes_gridloc_V1_' ...
+    '_ROI_' num2str(subj_info.ROIsize(1)) 'x' num2str(subj_info.ROIsize(1)) ...
+    '_' date '.mat'], 'coordsPred');
 
 
 
-%% 7 - Display the attenuation patterns:
+%% 7- Display the attenuation patterns:
 
-%plot imagesc to compare normGamma values to predicted values from
+%plot imagesc to compare normHFB values to predicted values from
 %model
+useAngio = exist('normAngio','var');
 if useAngio == 1
     MvM     = ROI(a).coords(b).MvM;
 end
 McM     = ROI(a).coords(b).McM;
 weights = ROI(a).coords(b).weights;
 
-%Set imagescale plots 
-GammaSq = reshape(normGamma,auxDims(2),auxDims(1)); %Gamma values per Elec
+%Set imagescale plots
+HFBSq = reshape(normHFB,auxDims(2),auxDims(1)); %HFB values per Elec
 DepthSq = reshape(McM,auxDims(2),auxDims(1));       %Depth Values per Elec
 if exist('MvM','var')==1
     AngioSq = reshape(MvM,auxDims(2),auxDims(1));   %Angio values per elec
@@ -239,49 +251,56 @@ roundCorr = round(corrPred,2); %rounded correlation for output figure
 % correct imagescale plots to match view (L or R hemi)
 switch subj_info.hemiVect.hemi
     case 'l'
-        GammaSq = rot90((GammaSq),2);
+        HFBSq = rot90((HFBSq),2);
         CombinedSq = rot90((CombinedSq),2);
         DepthSq = rot90((DepthSq),2);
         if exist('MvM','var')==1
-            AngioSq=rot90((AngioSq),2);
+            AngioSq = rot90((AngioSq),2);
         end
     case 'r'
-        GammaSq = flipud(GammaSq);
+        HFBSq = flipud(HFBSq);
         CombinedSq = flipud(CombinedSq);
         DepthSq = flipud(DepthSq);
         if exist('MvM','var')==1
-            AngioSq=flipud(AngioSq);
+            AngioSq = flipud(AngioSq);
         end
 end
 
-%Plot imagesc matrices
-if useAngio==1 
-    ax1 = subaxis(4,4,13,'Spacing',0);
-    imagesc(GammaSq), colormap(ax1,parula),
-    title('Gamma Mean'), axis square, axis off
-    
-    ax2=subaxis(4,4,14,'Spacing',0); 
-    imagesc(CombinedSq), colormap(ax2,parula),
-    title(['Combined Model (r = ',num2str(roundCorr),')']), axis square, axis off
-    
-    ax3=subaxis(4,4,16,'Spacing',0); 
-    imagesc(AngioSq), colormap(ax3,parula),
-    title('Angio Model'), axis square; axis off
-    
-    ax4=subaxis(4,4,15,'Spacing',0); 
-    imagesc(DepthSq), colormap(ax4,parula), 
-    title('Depth Model'), axis square, axis off
-else
-    ax1 = subaxis(4,4,14,'Spacing',0); 
-    imagesc(GammaSq), colormap(ax1,parula), 
-    title('Gamma Mean'), axis square, axis off
-    
-    ax2=subaxis(4,4,15,'Spacing',0); 
-    imagesc(DepthSq), colormap(ax2,parula),
-    title(['Depth Model (r = ',num2str(roundCorr),')']),axis square, axis off
+%set bad channels as background
+bad_alpha                 = ones(size(HFBSq));
+bad_alpha(isnan(HFBSq)) = 0; %setting transparency for bad channels
+
+%plot HFB pattern
+ax1 = subaxis(4,4,13,'Spacing',0);
+imagesc(HFBSq, 'AlphaData', bad_alpha), colormap(ax1,parula),
+title({'HFB pattern' '(leads = black)'}), axis square, axis off
+
+%Create thick line to indicate lead side
+switch subj_info.hemiVect.side
+    case 'u'
+        line([0.5,dims(1)+0.5],[0.5,0.5], 'Color','k','LineStyle','-','LineWidth',4);
+    case 'd'
+        line([0.5,dims(1)+0.5],[dims(2)+0.5,dims(2)+0.5], 'Color','k','LineStyle','-','LineWidth',4);
+    case 'l'
+        line([0.5,0.5],[0.5,dims(1)+0.5], 'Color','k','LineStyle','-','LineWidth',4);
+    case 'r'
+        line([dims(2)+0.5,dims(2)+0.5],[0.5,dims(1)+0.5], 'Color','k','LineStyle','-','LineWidth',4);
 end
 
+%plot combined model
+ax2 = subaxis(4,4,14,'Spacing',0);
+imagesc(CombinedSq), colormap(ax2,parula),
+title({'Combined Model' ['(r = ',num2str(roundCorr),')']}), axis square, axis off
 
-%% 8 - Save electrode coordinates in correct order:
-coordsPred = coordsPred(ind,:);
-save('intraopXXX_projected_electrodes_gridloc.mat', 'cortex', 'coordsPred');
+%plot depth model
+ax3 = subaxis(4,4,15,'Spacing',0);
+imagesc(DepthSq), colormap(ax3,parula),
+title('Depth Model'), axis square, axis off
+
+%plot angio model
+if useAngio==1
+    ax4 = subaxis(4,4,16,'Spacing',0);
+    imagesc(AngioSq), colormap(ax4,parula),
+    title('Angio Model'), axis square; axis off;
+end
+
