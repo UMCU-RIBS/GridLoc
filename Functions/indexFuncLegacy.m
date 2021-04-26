@@ -45,7 +45,7 @@ switch hemi
                 forward_ind      = indGrid(:);
                 
                 %inverse
-                indx             = flipud(rot90(reshape(inputGrid,dims(1),dims(2))',2));
+                indx             = flipud(rot90(reshape(inputGrid,dims(2),dims(1))',2));
                 indx             = indx(:);
                 baseGrid         = rot90(reshape(indx,dims(2),dims(1)),2);
                 [~,inverse_ind]  = sort(baseGrid(:));
@@ -56,7 +56,7 @@ switch hemi
                 forward_ind      = indGrid(:);
                 
                 %inverse
-                indx             = flipud(reshape(inputGrid,dims(1),dims(2))');
+                indx             = flipud(reshape(inputGrid,dims(2),dims(1))');
                 indx             = indx(:);
                 baseGrid         = rot90(reshape(indx,dims(2),dims(1)),2);
                 [~,inverse_ind]  = sort(baseGrid(:));
@@ -92,7 +92,7 @@ switch hemi
                 forward_ind         = auxIndGrid(:);
                 
                 %inverse
-                indx                = reshape(inputGrid,dims(1),dims(2))';
+                indx                = reshape(inputGrid,dims(2),dims(1))';
                 indx                = indx(:);
                 baseGrid            = reshape(indx,dims(2),dims(1));
                 [~,inverse_ind]     = sort(baseGrid(:));
@@ -104,7 +104,7 @@ switch hemi
                 forward_ind         = auxIndGrid(:);
                 
                 %inverse
-                indx                = rot90(reshape(inputGrid,dims(1),dims(2))',2);
+                indx                = rot90(reshape(inputGrid,dims(2),dims(1))',2);
                 indx                = indx(:);
                 baseGrid            = reshape(indx,dims(2),dims(1));
                 [~,inverse_ind]     = sort(baseGrid(:));
