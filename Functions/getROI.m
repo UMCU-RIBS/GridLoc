@@ -121,13 +121,13 @@ try
 
         %Deleting the previous ROI and coverage
         u =findobj('type','line');
-        delete(u(1));delete(u(2));; delete(h1);delete(j);delete(k);delete(u(3))
+        delete(u(1));delete(u(2)); delete(h1);delete(j);delete(k);delete(u(3))
 
         run = run+1; %this updates the run so the ROI's are saved in different substructs
    catch
-       warning('Please select a valid point on the brain!')
-       warning('Please select a valid point on the brain!')
-       warning('Please select a valid point on the brain!')
+       warning('Please select a valid point on the brain!');
+       warning('Please select a valid point on the brain!');
+       warning('Please select a valid point on the brain!');
        run = run+1;
 end
 end

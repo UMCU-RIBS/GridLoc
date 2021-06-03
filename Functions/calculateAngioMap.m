@@ -5,7 +5,7 @@ function [angioMap, normAngio]=calculateAngioMap(subj_info,Tthreshold,voxelDepth
 %changing the value in this script (see line 25), but was unadjusted during
 %our tests.
 %N.B.: Requires SPM-12 to run and seemingly had trouble running on OS X Sierra. 
-fprintf('Calculating AngioMap...')
+fprintf('Calculating AngioMap...\n')
 load (subj_info.neuralAct);
 
 % vol2surf

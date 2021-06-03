@@ -1,4 +1,4 @@
-function ctmr_gauss_plot(cortex,electrodes,h, weights)
+function ctmr_gauss_plot(cortex,electrodes, weights)
 % function [electrodes]=ctmr_gauss_plot(cortex,electrodes,weights)
 % projects electrode locations onto their cortical spots in the 
 % left hemisphere and plots about them using a gaussian kernel
@@ -66,6 +66,7 @@ for i=1:length(electrodes(:,1))
 end
 
 % c=(c/max(c));
+h = gcf;
 a=tripatch(cortex, h, c');
 shading interp;
 a=get(gca);
