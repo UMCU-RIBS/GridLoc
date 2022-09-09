@@ -1,4 +1,4 @@
-# GridLoc: Automatic localization method for high-density ECoG grids 
+# GridLoc: Automatic localization method for high-density ECoG grids    
 
 Please cite the following paper when you have used GridLoc for electrode localization in your study:
 
