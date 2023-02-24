@@ -81,7 +81,7 @@ dataOut=brain_info;
 
 br_cutoff_str=num2str(br_cutoff);
 outputnaam=strcat([outputdir subject '_balloon_'...
-    int2str(sm_lvl) '_' br_cutoff_str([1 3]) '.img']);
+    int2str(sm_lvl) '_' br_cutoff_str([1 3]) '.nii']);
 if ~exist(outputnaam,'file')
     dataOut.fname=outputnaam;
     disp(strcat(['saving ' outputnaam]));
