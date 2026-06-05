@@ -6,7 +6,7 @@ function [angioMap, normAngio]=calculateAngioMap(subj_info,Tthreshold,voxelDepth
 %our tests.
 %N.B.: Requires SPM-12 to run and seemingly had trouble running on OS X Sierra. 
 fprintf('Calculating AngioMap...\n')
-load (subj_info.neuralAct);
+load(subj_info.neuralAct);
 
 % vol2surf
 sfile = subj_info.sfile;
@@ -17,8 +17,8 @@ end
 
 % use voxplot_func_gm to calculate the angiogram t-map. 3rd and 4th
 % argument set the threshold (grey/white and voxel depth, respectively)
-[xyztCortex,t_surf] = voxplot_func_gm(sfile, tfile, cortex, Tthreshold, voxelDepth);
-angioMap = ctmr_vox_plot(cortex, xyztCortex,t_surf,1,subj_info.hemiVect.hemi,1);
+[xyztCortex,t_surf] = voxplot_func_gm(sfile, tfile, cortex, Tthreshold, voxelDepth,[]);
+angioMap = ctmr_vox_plot(cortex, xyztCortex,t_surf,1,subj_info.hemiVect.hemi,[],1);
 
 %Set upper boundary and normalize the angiomap
 Z = zscore(angioMap); %zcore angio

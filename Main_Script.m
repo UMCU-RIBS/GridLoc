@@ -50,7 +50,7 @@ end
 
 subj_info.sfile      = ['./Results/' subj_info.subj_name '_balloon_11_03.nii']; %surface balloon of the brain, to project the vessels
 subj_info.tfile      = '.../angiogram.nii'; %Angiogram T-file
-subj_info.Tthreshold = 70;    %threshold voor T-statistic for angiogram T-file with vessel information
+subj_info.Tthreshold = [30 70]; %[min] or [min and max] threshold voor T-statistic for angiogram T-file with vessel information
 subj_info.VoxelDepth = 8;      %searchdepth for co-registration of vessels to surface
 
 save(['./Results/' subj_info.subj_name '_subjectInfo.mat'],'subj_info');
